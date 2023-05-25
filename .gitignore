@@ -1,0 +1,15 @@
+.*
+!.gitignore
+!.clang-format
+
+compile_commands.json
+linux-*
+
+*.o
+*.ko
+*.mod
+*.mod.c
+
+Module.symvers
+modules.order
+
