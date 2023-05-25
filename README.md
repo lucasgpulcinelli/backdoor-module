@@ -1,4 +1,5 @@
-# Linux keylogger module
+# Linux backdoor module
+A simple demonstration of a linux kernel module that sends keyboard data to an external server, used for learning modules for the operating systems I class.
 
 ## Steps to compile the module
 - download linux kernel from kernel.org
