@@ -17,16 +17,20 @@ static int backdoor_socket_listen(void *_);
 int __init backdoor_socket_init(int port)
 {
 	int err;
-	struct sockaddr_in addr = { .sin_family = AF_INET,
-				    .sin_port = htons(port),
-				    .sin_addr = { htonl(INADDR_ANY) } };
+	struct sockaddr_in sin;
 
-	err = sock_create(PF_INET, SOCK_STREAM, IPPROTO_TCP, &sock);
+	memset(&sin, 0, sizeof(struct sockaddr_in));
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+	sin.sin_port = htons(port);
+
+	err = sock_create_kern(&init_net, PF_INET, SOCK_STREAM, IPPROTO_TCP,
+			       &sock);
 	if (err < 0) {
 		goto errl1;
 	}
 
-	err = sock->ops->bind(sock, (struct sockaddr *)&addr, sizeof(addr));
+	err = sock->ops->bind(sock, (struct sockaddr *)&sin, sizeof(sin));
 	if (err < 0) {
 		goto errl2;
 	}
@@ -50,32 +54,50 @@ errl1:
 	return err;
 }
 
+static void send_message(struct socket *conn)
+{
+	struct msghdr msg = { .msg_flags = 0 };
+	struct kvec iov = {
+		.iov_base = "Hello, Kernel!\n",
+		.iov_len = 16,
+	};
+
+	kernel_sendmsg(conn, &msg, &iov, 0, sizeof(iov));
+}
+
 static int backdoor_socket_listen(void *_)
 {
-	struct msghdr msg;
-	char data[] = "Hello, Kernel!\n";
-	memcpy_to_msg(&msg, data, sizeof(data));
+	while (!kthread_should_stop()) {
+		struct socket *conn = sock_alloc();
+		int err;
+		conn->type = sock->type;
+		conn->ops = sock->ops;
 
-	while (true) {
-		struct socket conn;
 		printk(KERN_INFO "backdoor: waiting on accept\n");
-		sock->ops->accept(sock, &conn, O_RDWR, false);
+		err = sock->ops->accept(sock, conn, O_RDWR, true);
+		if (err < 0) {
+			if (kthread_should_stop()) {
+				break;
+			}
+
+			printk(KERN_ERR
+			       "backdoor: error accepting connection, exiting\n");
+			return err;
+		}
 		printk(KERN_INFO "backdoor: accepted connection\n");
 
-		for (int i = 0; i < 5; i++) {
-			conn.ops->sendmsg(&conn, &msg, sizeof(msg));
-			printk(KERN_INFO "backdoor: sent message\n");
-		}
+		send_message(conn);
 
-		conn.ops->shutdown(sock, SHUT_RDWR);
-		conn.ops->release(&conn);
+		conn->ops->shutdown(conn, SHUT_RDWR);
+		conn->ops->release(conn);
 	}
 
+	printk(KERN_INFO "backdoor: exiting listener\n");
 	return 0;
 }
 
 void __exit backdoor_socket_exit(void)
 {
+	sock->ops->release(sock);
 	kthread_stop(listener);
-	sock_release(sock);
 }
