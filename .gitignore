@@ -3,7 +3,6 @@
 !.clang-format
 
 compile_commands.json
-linux-*
 
 *.o
 *.ko

