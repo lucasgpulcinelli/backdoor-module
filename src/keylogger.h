@@ -7,6 +7,8 @@
 
 #define KBD_IRQ 1  // Keyboard IRQ number
 
+char *consumer(void);
+
 int __init keyboard_module_init(void);
 
 void __exit keyboard_module_exit(void);

