@@ -16,8 +16,10 @@ irqreturn_t keyboard_interrupt_handler(int irq, void *dev_id)
     if (param && param->value) {
         unsigned int keycode = param->value;
 
+        char key = (char)keycode;
+
         // Process the keycode as per your requirements
-        printk(KERN_INFO "Key pressed: %u\n", keycode);
+        printk(KERN_INFO "Key pressed: %c\n",key);
 
         // Store the keycode in a linked list or perform any other required operation
     }
@@ -38,7 +40,7 @@ int keyboard_notifier_callback(struct notifier_block *nblock, unsigned long code
     return NOTIFY_OK;
 }
 
-static struct notifier_block keyboard_notifier_block = {
+struct notifier_block keyboard_notifier_block = {
     .notifier_call = keyboard_notifier_callback,
 };
 
