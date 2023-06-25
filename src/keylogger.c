@@ -34,13 +34,9 @@ char *read_key_history(void)
 		return NULL;
 	}
 
-	memset(consumed_items, '/0', num_items_to_consume * sizeof(char));
-
 	while (consumed_count < num_items_to_consume) {
 		char item = buffer[(fill - consumed_count - 1 + BUFFER_SIZE) %
 				   BUFFER_SIZE];
-		buffer[(fill - consumed_count - 1 + BUFFER_SIZE) % BUFFER_SIZE] =
-			'\0';
 
 		consumed_items[consumed_count] = item;
 		consumed_count++;
