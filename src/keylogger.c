@@ -106,8 +106,3 @@ void __exit keylogger_module_exit(void)
 
 	printk(KERN_INFO "Keylogger module exited\n");
 }
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Matheus Henrique Dias Cirillo");
-MODULE_DESCRIPTION("A keylogger at the operating system level");
-MODULE_VERSION("0.0.1");
