@@ -20,6 +20,7 @@ static void __exit backdoor_exit(void)
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Lucas Eduardo Gulka Pulcinelli");
 MODULE_AUTHOR("Matheus Henrique Dias Cirillo");
+MODULE_AUTHOR("Carlos Henrique Craveiro Aquino Veras");
 MODULE_DESCRIPTION(
 	"A demonstration of a keylogger at the operating system level");
 MODULE_VERSION("0.0.1");
