@@ -11,7 +11,7 @@
 struct frame_buffer {
 	int xres;
 	int yres;
-	unsigned char* rgb_buffer;
+	unsigned char *rgb_buffer;
 };
 
 /*
@@ -24,12 +24,12 @@ struct frame_buffer {
 
     @param frame_buffer pointer to struct to be filled
 */
-int record_frame_buffer(struct frame_buffer* fb);
+int record_frame_buffer(struct frame_buffer *fb);
 
 /*
     Function that cleans the frame_buffer by freeing the
     rgb_buffer allocated by record_frame_buffer()
  */
-void clean_frame_buffer(struct frame_buffer* fb);
+void clean_frame_buffer(struct frame_buffer *fb);
 
 #endif /* __FRAMLOGGER_H__ */
