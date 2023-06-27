@@ -6,7 +6,6 @@
     @attr xres the x resolution of the frame
     @attr yres the y resolution of the frame
     @attr rgb_buffer the RGB values of the buffer
-    
 */
 struct frame_buffer {
 	int xres;

