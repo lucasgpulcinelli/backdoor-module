@@ -7,7 +7,6 @@ A simple demonstration of a linux kernel module that sends keyboard data to an e
 - update the kernel to version 6.3.6-200.fc38.x86\_64, a few minor versions above or below should be fine
 - `sudo dnf install kernel-devel-6.3.6-200`
 - reboot the machine to use the correct kernel version (only if was not running it before)
-- `cd /usr/src/kernels/$(uname -r)/ && sudo make modules_prepare
 - go to the root of the backdoor project
 - `make` to compile the module itself, this is the only step that needs to be repeated if the source of the module changes
 - `make insert` to insert the backdoor module in the currently running kernel. **BE CAREFUL WITH THIS COMMAND**
@@ -15,4 +14,5 @@ A simple demonstration of a linux kernel module that sends keyboard data to an e
 
 ## Made fully by
 - [Lucas Eduardo Gulka Pulcinelli](https://github.com/lucasgpulcinelli)
+- [Matheus Henrique Dias Cirillo](https://github.com/cirillom)
 - 
