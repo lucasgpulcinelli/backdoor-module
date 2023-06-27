@@ -11,6 +11,6 @@ char *read_key_history(void);
 
 int __init keylogger_module_init(void);
 
-void __exit keylogger_module_exit(void);
+void keylogger_module_exit(void);
 
 #endif /* KEYBOARD_MODULE_H */

