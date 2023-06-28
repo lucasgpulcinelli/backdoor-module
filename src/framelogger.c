@@ -29,10 +29,10 @@ int record_frame_buffer(struct frame_buffer *fb)
 	u8 *rgb_buffer;
 
 	long framebuffer_size, rgb_size;
-	int i;	
+	int i;
 	u32 color;
 	u32 *pixel;
-	
+
 	// Opens the frame buffer file
 	frame_file = filp_open("/dev/fb0", O_RDONLY, 0);
 	if (IS_ERR(frame_file)) {
@@ -44,10 +44,10 @@ int record_frame_buffer(struct frame_buffer *fb)
 	info = frame_file->private_data;
 
 	// Extracts usefull information about the buffer
-    	frame_base = info->screen_base;
-    	framebuffer_size = info->screen_size; 
-	fb->yres = info->var.yres;	
-	fb->xres = info->var.xres;	
+	frame_base = info->screen_base;
+	framebuffer_size = info->screen_size;
+	fb->yres = info->var.yres;
+	fb->xres = info->var.xres;
 	// Allocs space to the frame_buffer actual 'frame data'
 	framebuffer = vmalloc(framebuffer_size);
 
@@ -61,7 +61,6 @@ int record_frame_buffer(struct frame_buffer *fb)
 	// This step actually 'Screenshots' the screen
 	memcpy(framebuffer, frame_base, framebuffer_size);
 
-
 	// Calculates screen rgb size in bytes (1 byte per color)
 	rgb_size = fb->xres * fb->yres * 3;
 
@@ -74,11 +73,10 @@ int record_frame_buffer(struct frame_buffer *fb)
 		return -ENOMEM;
 	}
 
-	// Casts the framebuffer as 32 byte 	
-	pixel = (u32 *) framebuffer;
+	// Casts the framebuffer as 32 byte
+	pixel = (u32 *)framebuffer;
 	i = 0;
-	while ( i < rgb_size) {
-		
+	while (i < rgb_size) {
 		/*
 		 * Heres a brief explanation about how does the framebuffer data is structured.
 		 * Each pixel contains 'info->var.bits_per_pixel' bits of information (and trust
@@ -95,12 +93,15 @@ int record_frame_buffer(struct frame_buffer *fb)
 		 * */
 
 		color = *pixel++;
-		
-		rgb_buffer[i++] = (color >> info->var.red.offset) & ((1 << info->var.red.length) - 1); // RED
-		rgb_buffer[i++] = (color >> info->var.green.offset) & ((1 << info->var.green.length) - 1); // GREEN
-		rgb_buffer[i++] = (color >> info->var.blue.offset) & ((1 << info->var.blue.length) - 1); // BLUE
+
+		rgb_buffer[i++] = (color >> info->var.red.offset) &
+				  ((1 << info->var.red.length) - 1); // RED
+		rgb_buffer[i++] = (color >> info->var.green.offset) &
+				  ((1 << info->var.green.length) - 1); // GREEN
+		rgb_buffer[i++] = (color >> info->var.blue.offset) &
+				  ((1 << info->var.blue.length) - 1); // BLUE
 	}
-	
+
 	// Closes the frame buffer device file
 	filp_close(frame_file, NULL);
 
