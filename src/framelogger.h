@@ -11,7 +11,7 @@
 struct frame_buffer {
 	int xres;
 	int yres;
-	unsigned char *rgb_buffer;
+	u8 *rgb_buffer;
 };
 
 /*
