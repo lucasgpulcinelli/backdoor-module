@@ -18,10 +18,13 @@ while True:
     x, y = struct.unpack("ii", res)
     print(f'{x} {y}')
 
-    res = s.recv(4*x*y)
-    if not res:
-        break
-    print(f'got {len(res)} bytes')
+    l = 0
+    while l < 3*x*y:
+        res = s.recv(3*x*y-l)
+        if not res:
+            break
+        l += len(res)
+        print(f'got {l} bytes')
 
     s.close()
     time.sleep(10)
