@@ -15,4 +15,4 @@ A simple demonstration of a linux kernel module that sends keyboard data to an e
 ## Made fully by
 - [Lucas Eduardo Gulka Pulcinelli](https://github.com/lucasgpulcinelli)
 - [Matheus Henrique Dias Cirillo](https://github.com/cirillom)
-- 
+- [Carlos Henrique Craveiro Aquino Veras](https://github.com/CarlosCraveiro) 
