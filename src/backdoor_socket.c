@@ -59,6 +59,7 @@ static void send_message(struct socket *conn)
 	printk(KERN_INFO "done\n");
 
 	clean_frame_buffer(&fb);
+  kfree(iov.iov_base);
 }
 
 /*

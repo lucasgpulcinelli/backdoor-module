@@ -14,7 +14,6 @@ res = s.recv(8)
 if not res:
     quit(-1)
 x, y = struct.unpack("ii", res)
-print(f'{x} {y}')
 
 l = 0
 final_buf = bytes()
@@ -24,11 +23,10 @@ while l < 3*x*y:
         break
     l += len(res)
     final_buf += res
-    print(f'got {l} bytes')
 
 f = open("out.ppm", "wb")
 f.write(b"P6\n")
-f.write(b"1440 900\n")
+f.write(f"{x} {y}\n".encode())
 f.write(b"255\n")
 f.write(final_buf)
 
