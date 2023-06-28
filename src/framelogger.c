@@ -97,7 +97,7 @@ int record_frame_buffer(struct frame_buffer *fb)
 
 	// Record the resolution of the screen before copying the frame buffer
 	strcpy(command,
-	       "neofetch | grep -oP '\\S+x\\S+' > /tmp/screen_resolution.txt");
+	       "neofetch | grep -oP '\\d+x\\d+' > /tmp/screen_resolution.txt");
 	strcpy(file_name, "/tmp/screen_resolution.txt");
 	error = execute_shell_command(command);
 

